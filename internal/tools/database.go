@@ -6,16 +6,20 @@ import (
 
 type Todo struct {
 	ID     string `json:"id"`
-	Desc   string `json:"title"`
+	Desc   string `json:"description"`
 	Status string `json:"status"`
 }
 
 type DatabaseInterface interface {
-	GetTodoList(id int) *Todo
+	GetTodoList(id string) *Todo
+	GetTodo() *[]Todo
+	CreateTodo(todo *Todo) *[]Todo
+	UpdateTodoDetails(id string, newTodo string, newStatus string) *[]Todo
+	DeleteTodoDetails(id string) *[]Todo
 	SetupDatabase() error
 }
 
-func NewDatabase() (*DatabaseInterface, error) {
+func NewDatabase() (DatabaseInterface, error) {
 	var database DatabaseInterface = &mockDB{}
 
 	var err error = database.SetupDatabase()
@@ -24,5 +28,5 @@ func NewDatabase() (*DatabaseInterface, error) {
 		return nil, err
 	}
 
-	return &database, nil
+	return database, nil
 }

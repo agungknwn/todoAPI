@@ -1,12 +1,19 @@
 package handler
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"github.com/waksun0x00/todoAPI/internal/tools"
+	"github.com/go-chi/chi"
+	// chimiddle "github.com/go-chi/chi/middleware"
 )
 
-func GetTodoList(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, tools.GetTodo())
+func Handler(r *chi.Mux) {
+	// global middleware
+	// r.Use(chimiddle.StripSlashes)
+	r.Route("/TodoList", func(router chi.Router) {
+
+		router.Get("/", GetTodolist)
+		router.Get("/{id}", GetTodoDetails)
+		router.Post("/", CreateTodolist)
+		router.Put("/{id}", UpdateTodoDetails)
+		router.Delete("/{id}", DeleteTodoDetails)
+	})
 }

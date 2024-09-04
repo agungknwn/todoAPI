@@ -1,13 +1,23 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/go-chi/chi"
 	"github.com/waksun0x00/todoAPI/internal/handler"
 )
 
 func main() {
-	router := gin.Default()
-	router.GET("/TodoList", handler.GetTodoList)
+	var router *chi.Mux = chi.NewRouter()
+	handler.Handler(router)
 
-	router.Run("localhost:6666")
+	fmt.Println("Starting GO RESTful API...")
+
+	err := http.ListenAndServe("localhost:6666", router)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

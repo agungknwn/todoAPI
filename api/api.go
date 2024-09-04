@@ -7,15 +7,21 @@ import (
 	"github.com/waksun0x00/todoAPI/internal/tools"
 )
 
-type TodoParams struct {
-	ID int
-}
+// type TodoParams struct {
+// 	ID string
+// }
 
 type TodoResponse struct {
 	// success code
 	Code int
 
 	Details tools.Todo
+}
+
+type TodoListResponse struct {
+	Code int
+
+	TodoList []tools.Todo
 }
 
 type Error struct {
