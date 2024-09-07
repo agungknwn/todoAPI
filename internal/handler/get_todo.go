@@ -11,18 +11,8 @@ import (
 )
 
 func GetTodoDetails(w http.ResponseWriter, r *http.Request) {
-	// var id = api.TodoParams{}
-	// var decoder *schema.Decoder = schema.NewDecoder()
 	var err error
 	var database *tools.Todo
-
-	// err = decoder.Decode(&id, r.URL.Query())
-
-	// if err != nil {
-	// 	log.Error(err)
-	// 	api.InternalErrorHandler(w)
-	// 	return
-	// }
 
 	id := chi.URLParam(r, "id")
 
