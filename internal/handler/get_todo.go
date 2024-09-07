@@ -46,10 +46,6 @@ func GetTodolist(w http.ResponseWriter, r *http.Request) {
 		api.InternalErrorHandler(w)
 		return
 	}
-	if err != nil {
-		api.InternalErrorHandler(w)
-		return
-	}
 
 	var response = api.TodoListResponse{
 		TodoList: (*database),
