@@ -11,31 +11,25 @@ import (
 
 func CreateTodolist(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var database tools.DatabaseInterface
-
-	database, err = tools.NewDatabase()
-	if err != nil {
-		api.InternalErrorHandler(w)
-		return
-	}
+	var database *[]tools.Todo
 
 	// Decode the JSON request body into the NewTodo struct
 	var NewTodo tools.Todo
 	err = json.NewDecoder(r.Body).Decode(&NewTodo)
 	if err != nil {
 		log.Error(err)
-		api.RequestErrorHandler(w, err) // Assuming you have a handler for bad requests
+		api.RequestErrorHandler(w, err) // handler for bad requests
 		return
 	}
 
-	var NewTodoList *[]tools.Todo = database.CreateTodo(&NewTodo)
-	if NewTodoList == nil {
-		log.Error(err)
+	database, err = tools.CreateTodo(&NewTodo)
+	if err != nil {
 		api.InternalErrorHandler(w)
+		return
 	}
 
 	var response = api.TodoListResponse{
-		TodoList: (*NewTodoList),
+		TodoList: (*database),
 		Code:     http.StatusOK,
 	}
 

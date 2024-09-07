@@ -12,13 +12,7 @@ import (
 
 func UpdateTodoDetails(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var database tools.DatabaseInterface
-
-	database, err = tools.NewDatabase()
-	if err != nil {
-		api.InternalErrorHandler(w)
-		return
-	}
+	var database *[]tools.Todo
 
 	// Decode the JSON request body into the NewTodo struct
 	id := chi.URLParam(r, "id")
@@ -35,14 +29,14 @@ func UpdateTodoDetails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var UpdatedTodoList *[]tools.Todo = database.UpdateTodoDetails(id, updateTodo.NewTodo, updateTodo.NewStatus)
-	if UpdatedTodoList == nil {
-		log.Error(err)
+	database, err = tools.UpdateTodoDetails(id, updateTodo.NewTodo, updateTodo.NewStatus)
+	if err != nil {
 		api.InternalErrorHandler(w)
+		return
 	}
 
 	var response = api.TodoListResponse{
-		TodoList: (*UpdatedTodoList),
+		TodoList: (*database),
 		Code:     http.StatusOK,
 	}
 

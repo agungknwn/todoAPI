@@ -15,7 +15,7 @@ func main() {
 
 	fmt.Println("Starting GO RESTful API...")
 
-	err := http.ListenAndServe("localhost:6666", router)
+	err := http.ListenAndServe("localhost:8000", router)
 
 	if err != nil {
 		log.Fatal(err)

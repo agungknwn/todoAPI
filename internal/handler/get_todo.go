@@ -11,11 +11,12 @@ import (
 )
 
 func GetTodoDetails(w http.ResponseWriter, r *http.Request) {
-	// var params = api.TodoParams{}
+	// var id = api.TodoParams{}
 	// var decoder *schema.Decoder = schema.NewDecoder()
 	var err error
+	var database *tools.Todo
 
-	// err = decoder.Decode(&params, r.URL.Query())
+	// err = decoder.Decode(&id, r.URL.Query())
 
 	// if err != nil {
 	// 	log.Error(err)
@@ -25,22 +26,14 @@ func GetTodoDetails(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	var database tools.DatabaseInterface
-	database, err = tools.NewDatabase()
+	database, err = tools.GetTodoList(id)
 	if err != nil {
 		api.InternalErrorHandler(w)
 		return
 	}
 
-	var todoDetails *tools.Todo = database.GetTodoList(id)
-	if todoDetails == nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
-
 	var response = api.TodoResponse{
-		Details: (*todoDetails),
+		Details: (*database),
 		Code:    http.StatusOK,
 	}
 
@@ -56,22 +49,20 @@ func GetTodoDetails(w http.ResponseWriter, r *http.Request) {
 
 func GetTodolist(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var database tools.DatabaseInterface
+	var database *[]tools.Todo
 
-	database, err = tools.NewDatabase()
+	database, err = tools.GetTodo()
+	if err != nil {
+		api.InternalErrorHandler(w)
+		return
+	}
 	if err != nil {
 		api.InternalErrorHandler(w)
 		return
 	}
 
-	var todoList *[]tools.Todo = database.GetTodo()
-	if *todoList == nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-	}
-
 	var response = api.TodoListResponse{
-		TodoList: (*todoList),
+		TodoList: (*database),
 		Code:     http.StatusOK,
 	}
 

@@ -15,22 +15,15 @@ func DeleteTodoDetails(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	var database tools.DatabaseInterface
-	database, err = tools.NewDatabase()
+	var database *[]tools.Todo
+	database, err = tools.DeleteTodoDetails(id)
 	if err != nil {
 		api.InternalErrorHandler(w)
 		return
 	}
 
-	var DeletedTodoList *[]tools.Todo = database.DeleteTodoDetails(id)
-	if DeletedTodoList == nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
-
 	var response = api.TodoListResponse{
-		TodoList: (*DeletedTodoList),
+		TodoList: (*database),
 		Code:     http.StatusOK,
 	}
 

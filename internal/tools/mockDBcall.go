@@ -5,49 +5,51 @@ import (
 	"time"
 )
 
-type mockDB struct{}
-
 var mockTodoList = []Todo{
 	{ID: "123ABC", Desc: "Cuci Baju", Status: "On Going"},
 	{ID: "234BCA", Desc: "Mandi", Status: "On Going"},
 	{ID: "345DEF", Desc: "Makan", Status: "On Going"},
 }
 
-func (d *mockDB) GetTodoList(id string) *Todo {
+func GetTodoList(id string) (*Todo, error) {
 	// DB call simulations
 	time.Sleep(time.Second * 1)
+	var err error
 
 	var clientData = Todo{}
-	var database = []Todo{}
-	database = mockTodoList
-	for i := range database {
-		if id == database[i].ID {
-			clientData = database[i]
+	for i := range mockTodoList {
+		if id == mockTodoList[i].ID {
+			clientData = mockTodoList[i]
+			err = nil
 			break
 		}
 	}
 
-	return &clientData
+	return &clientData, err
 }
 
-func (d *mockDB) GetTodo() *[]Todo {
+func GetTodo() (*[]Todo, error) {
+	var err error
 	time.Sleep(time.Second * 1)
-	return &mockTodoList
+	err = nil
+	return &mockTodoList, err
 }
 
-func (d *mockDB) CreateTodo(todo *Todo) *[]Todo {
+func CreateTodo(todo *Todo) (*[]Todo, error) {
 	time.Sleep(time.Second * 1)
+	var err error = nil
 
 	mockTodoList = append(mockTodoList, *todo)
 
 	fmt.Println("Successfully Add new Task")
 
-	return &mockTodoList
+	return &mockTodoList, err
 }
 
-func (d *mockDB) UpdateTodoDetails(id string, newTodo string, newStatus string) *[]Todo {
+func UpdateTodoDetails(id string, newTodo string, newStatus string) (*[]Todo, error) {
 	time.Sleep(time.Second * 1)
 	// var clientData []Todo = mockTodoList
+	var err error = nil
 
 	for i := range mockTodoList {
 		if id == mockTodoList[i].ID {
@@ -59,13 +61,14 @@ func (d *mockDB) UpdateTodoDetails(id string, newTodo string, newStatus string) 
 
 	fmt.Println("Successfully Update Task")
 
-	return &mockTodoList
+	return &mockTodoList, err
 }
 
-func (d *mockDB) DeleteTodoDetails(id string) *[]Todo {
+func DeleteTodoDetails(id string) (*[]Todo, error) {
 	time.Sleep(time.Second * 1)
 
 	// var clientData []Todo = mockTodoList
+	var err error = nil
 
 	for i := range mockTodoList {
 		if id == mockTodoList[i].ID {
@@ -74,9 +77,7 @@ func (d *mockDB) DeleteTodoDetails(id string) *[]Todo {
 		}
 	}
 
-	return &mockTodoList
-}
+	fmt.Println("Successfully Delete Task")
 
-func (d *mockDB) SetupDatabase() error {
-	return nil
+	return &mockTodoList, err
 }
