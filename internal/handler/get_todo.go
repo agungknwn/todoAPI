@@ -10,54 +10,48 @@ import (
 	"github.com/waksun0x00/todoAPI/internal/tools"
 )
 
-func GetTodoDetails(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var database *tools.Todo
+func (svc *APIservice) GetTodoID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "Application/json")
 
-	id := chi.URLParam(r, "id")
+	resp := &api.TodoResponse{}
 
-	database, err = tools.GetTodoList(id)
+	defer json.NewEncoder(w).Encode(resp)
+
+	todoID := chi.URLParam(r, "id")
+
+	repo := tools.TodoRepo{DBcollection: svc.MongoCollections}
+
+	todo, err := repo.FindTodoID(todoID)
+
 	if err != nil {
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Get todo failed", err)
+		resp.Code = err.Error()
 		return
 	}
-
-	var response = api.TodoResponse{
-		Details: (*database),
-		Code:    http.StatusOK,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
-
+	resp.Data = todo
+	w.WriteHeader(http.StatusOK)
 }
 
-func GetTodolist(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var database *[]tools.Todo
+func (svc *APIservice) GetTodolist(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "Application/json")
 
-	database, err = tools.GetTodo()
+	resp := &api.TodoResponse{}
+
+	defer json.NewEncoder(w).Encode(resp)
+
+	repo := tools.TodoRepo{DBcollection: svc.MongoCollections}
+
+	todoList, err := repo.FindTodoList()
+
 	if err != nil {
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Get todo failed", err)
+		resp.Code = err.Error()
 		return
 	}
 
-	var response = api.TodoListResponse{
-		TodoList: (*database),
-		Code:     http.StatusOK,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
+	resp.Data = todoList
+	w.WriteHeader(http.StatusOK)
 
 }

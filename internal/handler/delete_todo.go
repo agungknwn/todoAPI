@@ -10,29 +10,27 @@ import (
 	"github.com/waksun0x00/todoAPI/internal/tools"
 )
 
-func DeleteTodoDetails(w http.ResponseWriter, r *http.Request) {
-	var err error
+func (svc *APIservice) DeleteTodoByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "Application/json")
 
-	id := chi.URLParam(r, "id")
+	resp := &api.TodoResponse{}
+	// Decode the JSON request body into the NewTodo struct
+	defer json.NewEncoder(w).Encode(resp)
 
-	var database *[]tools.Todo
-	database, err = tools.DeleteTodoDetails(id)
+	todoID := chi.URLParam(r, "id")
+
+	repo := tools.TodoRepo{DBcollection: svc.MongoCollections}
+
+	// insert Todo
+	count, err := repo.DeleteTodo(todoID)
 	if err != nil {
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("error :", err)
+		resp.Code = err.Error()
 		return
 	}
 
-	var response = api.TodoListResponse{
-		TodoList: (*database),
-		Code:     http.StatusOK,
-	}
+	resp.Data = count
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
-
+	w.WriteHeader(http.StatusOK)
 }

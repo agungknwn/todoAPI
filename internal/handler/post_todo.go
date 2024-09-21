@@ -4,40 +4,44 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/waksun0x00/todoAPI/api"
 	"github.com/waksun0x00/todoAPI/internal/tools"
 )
 
-func CreateTodolist(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var database *[]tools.Todo
+func (svc *APIservice) CreateTodo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "Application/json")
 
+	resp := &api.TodoResponse{}
 	// Decode the JSON request body into the NewTodo struct
-	var NewTodo tools.Todo
-	err = json.NewDecoder(r.Body).Decode(&NewTodo)
+	defer json.NewEncoder(w).Encode(resp)
+
+	var todo tools.Todo
+
+	err := json.NewDecoder(r.Body).Decode(&todo)
 	if err != nil {
-		log.Error(err)
-		api.RequestErrorHandler(w, err) // handler for bad requests
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Invalid body", err) // handler for bad requests
+		resp.Code = err.Error()
 		return
 	}
 
-	database, err = tools.CreateTodo(&NewTodo)
+	todo.ID = uuid.New().String()
+
+	repo := tools.TodoRepo{DBcollection: svc.MongoCollections}
+
+	// insert Todo
+	insertID, err := repo.InsertTodo(&todo)
 	if err != nil {
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Insert todo failed", err)
+		resp.Code = err.Error()
 		return
 	}
 
-	var response = api.TodoListResponse{
-		TodoList: (*database),
-		Code:     http.StatusOK,
-	}
+	resp.Data = todo.ID
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
-		return
-	}
+	w.WriteHeader(http.StatusOK)
+	log.Println("Todo inserted with id", insertID, todo)
 }

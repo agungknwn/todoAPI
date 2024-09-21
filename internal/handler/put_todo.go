@@ -10,41 +10,45 @@ import (
 	"github.com/waksun0x00/todoAPI/internal/tools"
 )
 
-func UpdateTodoDetails(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var database *[]tools.Todo
+func (svc *APIservice) UpdateTodoByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "Application/json")
 
+	resp := &api.TodoResponse{}
 	// Decode the JSON request body into the NewTodo struct
-	id := chi.URLParam(r, "id")
+	defer json.NewEncoder(w).Encode(resp)
 
-	var updateTodo struct {
-		NewTodo   string `json:"description"`
-		NewStatus string `json:"status"`
-	}
-
-	err = json.NewDecoder(r.Body).Decode(&updateTodo)
-	if err != nil {
-		log.Error(err)
-		api.RequestErrorHandler(w, err)
+	todoID := chi.URLParam(r, "id")
+	if todoID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("invalid todoID")
+		resp.Code = "Invalid todo ID"
 		return
 	}
 
-	database, err = tools.UpdateTodoDetails(id, updateTodo.NewTodo, updateTodo.NewStatus)
+	var todo tools.Todo
+
+	err := json.NewDecoder(r.Body).Decode(&todo)
 	if err != nil {
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Invalid body", err) // handler for bad requests
+		resp.Code = err.Error()
 		return
 	}
 
-	var response = api.TodoListResponse{
-		TodoList: (*database),
-		Code:     http.StatusOK,
-	}
+	todo.ID = todoID
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
+	repo := tools.TodoRepo{DBcollection: svc.MongoCollections}
+
+	// insert Todo
+	count, err := repo.UpdateTodo(todoID, &todo)
 	if err != nil {
-		log.Error(err)
-		api.InternalErrorHandler(w)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Update todo failed", err)
+		resp.Code = err.Error()
 		return
 	}
+
+	resp.Data = count
+
+	w.WriteHeader(http.StatusOK)
 }
